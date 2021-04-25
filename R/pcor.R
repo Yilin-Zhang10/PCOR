@@ -10,7 +10,11 @@ sub_mat <- function(mat, r, n, p){
   mat_ctr <- mat_ctr[-r,]
 
   # standardize the difference matrix
-  mat_std <- mat_ctr/(matrix(sqrt(rowSums(mat_ctr^2)),n-1,1)%*%matrix(1,1,p))
+  if(p>1){
+    mat_std <- mat_ctr/(matrix(sqrt(rowSums(mat_ctr^2)),n-1,1)%*%matrix(1,1,p))
+  }else if(p==1){
+    mat_std <- mat_ctr/(matrix(sqrt(mat_ctr^2),n-1,1)%*%matrix(1,1,p))
+  }
 
   # get the angle from there difference
   A <- suppressWarnings(acos(eigenMapMatMult(mat_std, t(mat_std))))
@@ -35,20 +39,20 @@ one_pcov <- function(r, X, Y, n, p, q, estimation.method){
   # calculate the u-statistics result and v statistics result
   if(estimation.method=="u"){
 
-    
+
     mmx <- matrix(diag(mx),n-1,1)%*%matrix(1, 1, n-1)*my
     mmy <- matrix(diag(my),n-1,1)%*%matrix(1, 1, n-1)*mx
-    
+
     a <- sum(diag(xy_mm))
     b <- sum(diag(mx)*diag(my))
     sr1 <- a-b
     sr2 <- sum(xy_mm)-a+2*b-sum(mmx)-sum(mmy)
     sr3 <- (sum(mx)-sum(diag(mx)))*(sum(my)-sum(diag(my)))-2*sr1-4*sr2
-  
+
     # calculate the S2 and pcov
     out[1] <- sr3/((n-1)*(n-2)*(n-3)*(n-4))
     out[2] <- sr1/((n-1)*(n-2)) - 2*sr2/((n-1)*(n-2)*(n-3)) + sr3/((n-1)*(n-2)*(n-3)*(n-4))
-  
+
   }else if(estimation.method=="v"){
 
     sr <- sum(xy_mm)/n^3
@@ -95,9 +99,9 @@ pcov_para <- function(cl, X, Y, estimation.method){
     my <- sub_mat(Y, r, n, q)
     xy_mm <- eigenMapMatMult(mx, my)
     xy_ele <- mx*my
-    if(estimation.method=="u"){    
+    if(estimation.method=="u"){
 	    mmx <- matrix(diag(mx),n-1,1)%*%matrix(1, 1, n-1)*my
-        mmy <- matrix(diag(my),n-1,1)%*%matrix(1, 1, n-1)*mx    
+        mmy <- matrix(diag(my),n-1,1)%*%matrix(1, 1, n-1)*mx
         a <- sum(diag(xy_mm))
         b <- sum(diag(mx)*diag(my))
         sr1 <- a-b
@@ -144,23 +148,6 @@ pcov_va_para <- function(X, Y, estimation.method){
 #' @references L.Zhu, K.Xu, R.Li, W.Zhong(2017). Projection correlation between two random vectors. Biometrika, Volume 104, Pages 829-843. https://doi.org/10.1093/biomet/asx043
 #' @export
 pcov <- function(X, Y, estimation.method="u", parallel=FALSE){
-  if(nrow(X)>150) message("If the number of your sample is larger than 150, we suggest you setting the parameter \"parallel\" TURE, which is faster.")
-
-  # whether the numbers of two sample are equal
-  if(nrow(X)!=nrow(Y)) {
-    stop("The numbers of row in two matrix should be equal.")
-  }
-
-  # whether n,p,q is big enough.
-  if(nrow(X)<=3) {
-    stop("The dimension of X should larger than 3.")
-  }
-  if(ncol(X)<=1) {
-    stop("The dimension of X should larger than 1.")
-  }
-  if(ncol(Y)<=1) {
-    stop("The dimension of Y should larger than 1.")
-  }
 
   # calculate the pcov value
   if(parallel == FALSE){
@@ -170,13 +157,8 @@ pcov <- function(X, Y, estimation.method="u", parallel=FALSE){
   }else{
     stop("The parameter \"parallel\" should be TRUE or FALSE.")
   }
+  return(t)
 
-  if(t<0){
-    warning("The square of projection correlation from U statistics estimation is negative, please try v statistics instead.")
-    return(0.000)
-  }else{
-    return(sqrt(t))
-  }
 }
 
 
@@ -196,18 +178,13 @@ pcov <- function(X, Y, estimation.method="u", parallel=FALSE){
 #' @references L.Zhu, K.Xu, R.Li, W.Zhong(2017). Projection correlation between two random vectors. Biometrika, Volume 104, Pages 829-843. https://doi.org/10.1093/biomet/asx043
 #' @export
 pcor <- function(X, Y, estimation.method="u", parallel=FALSE){
-  if(nrow(X)>150) message("If the number of your sample is larger than 150, we suggest you setting the parameter \"parallel\" TURE, which is faster.")
 
   t1 <- suppressMessages(pcov(X, Y, estimation.method, parallel))
   t2 <- suppressMessages(pcov(X, X, estimation.method, parallel))
   t3 <- suppressMessages(pcov(Y, Y, estimation.method, parallel))
 
-  if(t1<0 | t2<=0 | t3<=0){
-    warning("The square of projection correlation from U statistics estimation is negative, please try v statistics instead.")
-    return(0)
-  }else{
-    return(t1/sqrt(t2)/sqrt(t3))
-  }
+  return(t1/sqrt(t2)/sqrt(t3))
+
 }
 
 
@@ -225,12 +202,6 @@ chisq_va <- function(X, Y, estimation.method){
   # whether n,p,q is big enough.
   if(nrow(X)<=3) {
     stop("The dimension of X should larger than 3.")
-  }
-  if(ncol(X)<=1) {
-    stop("The dimension of X should larger than 1.")
-  }
-  if(ncol(Y)<=1) {
-    stop("The dimension of Y should larger than 1.")
   }
 
   # calculate the chisq_va value

@@ -1,17 +1,17 @@
 Package: PCOR
 Type: Package
-Title: Projection correlation
-Version: 3.2.0
-Author: Yilin Zhang <lesliezhang2017@gmail.com>
+Title: Projection Correlation
+Version: 1.0.0
+Author: Yilin Zhang <lesliezhang2017@gmail.com>, Kai Xu, Liping Zhu
 Maintainer: Yilin Zhang <lesliezhang2017@gmail.com>
 Description: Calculate the projection covariance and correlation of two random vectors.
-License: MIT
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
-Imports: doParallel, Rcpp, RcppEigen
+RoxygenNote: 7.1.1
+Imports: 
+    doParallel,
+    Rcpp,
+    RcppEigen
 Depends: doParallel, Rcpp, RcppEigen
 LinkingTo: doParallel, Rcpp, RcppEigen
-
-
-
