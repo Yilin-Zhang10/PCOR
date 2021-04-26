@@ -1,5 +1,5 @@
-# PCOR
-R package for independence test between two random vectors via **projection correlation**.
+# PCOR (Projection Correlation)
+R package for independence test between two random vectors via **Projection Correlation**.
 
 To install this package in R, 
 ```R
